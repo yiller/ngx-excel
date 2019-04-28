@@ -16,6 +16,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ngx-excel": [
+        "dist/ngx-excel"
+      ],
+      "ngx-excel/*": [
+        "dist/ngx-excel/*"
+      ]
+    }
   }
 }
