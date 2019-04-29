@@ -1,0 +1,213 @@
+<div *ngIf="!context" class="cell"></div>
+<ng-container *ngIf="context">
+    <!-- 只读模式 -->
+    <ng-container *ngIf="componentMode === 'readMode'">
+        <!-- ExcelCell 自身的模板 优先级最高 -->
+        <ng-container *ngIf="template">
+            <ng-container *ngTemplateOutlet="template; context: { context: context, column: column }"></ng-container>
+        </ng-container>
+        <!-- 从列定义中继承的模板 -->
+        <ng-container *ngIf="!template && column.template">
+            <ng-container *ngTemplateOutlet="column.template; context: { context: context, column: column }">
+            </ng-container>
+        </ng-container>
+        <!-- 列类型默认模板 -->
+        <div *ngIf="!template && !column.template" class="cell-combo">
+            <div class="input-group">
+                <!-- 只读模式: 文本1, 数字3 -->
+                <ng-container *ngIf="['text','textNumber','number'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue; else missingTemplate">
+                        <div class="cell"> {{ componentValue }} </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- 只读模式：多行文本2 -->
+                <ng-container *ngIf="['multilineText'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue; else missingTemplate">
+                        <!-- <div class="table-cell-text table-cell-multiline"> {{ value }} </div> -->
+                        <div class="cell"> {{ componentValue }} </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- 只读模式：日期时间 -->
+                <ng-container *ngIf="['datetime'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue; else missingTemplate">
+                        <div class="cell"> {{ componentValue | ngxExcelDateTime }} </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- 只读模式：日期 -->
+                <ng-container *ngIf="['date'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue; else missingTemplate">
+                        <div class="cell"> {{ componentValue | ngxExcelDateTime:'date' }} </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- 只读模式：时间 -->
+                <ng-container *ngIf="['time'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue; else missingTemplate">
+                        <div class="cell"> {{ componentValue | ngxExcelDateTime:'time' }} </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- 只读模式：布尔 -->
+                <ng-container *ngIf="['bool'].indexOf(column.columnType) >= 0">
+                    <div class="cell"> {{ componentValue ? '是' : '否' }} </div>
+                </ng-container>
+
+                <!-- 只读模式：金额 -->
+                <ng-container *ngIf="['currency'].indexOf(column.columnType) >= 0">
+                    <div class="cell"> {{ componentValue | ngxExcelCurrency }} </div>
+                </ng-container>
+
+                <!-- 只读模式: 外键 -->
+                <ng-container *ngIf="['foreignKey'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue; else missingTemplate">
+                        <div class="cell">{{ componentValue[column.labelKey || 'label'] }}</div>
+                    </ng-container>
+                </ng-container>
+
+                 <!-- 只读模式: 单选7 -->
+                 <ng-container *ngIf="['selectOption'].indexOf(column.columnType) >= 0">
+                        <ng-container *ngIf="componentValue && componentValue.value; else missingTemplate">
+                            <div class="cell"> 
+                                {{ componentValue | ngxExcelSelectOption }} 
+                            </div>
+                        </ng-container>
+                </ng-container>
+    
+                <!-- 只读模式: 多选8, Tags9 -->
+                <ng-container *ngIf="['multiSelectOption','tagsSelectOption'].indexOf(column.columnType) >= 0">
+                    <ng-container *ngIf="componentValue && componentValue.length > 0; else missingTemplate">
+                            <div class="table-cell-text"> 
+                                {{ componentValue | ngxExcelSelectOption }} 
+                            </div>
+                    </ng-container>
+                </ng-container>
+
+            </div>
+        </div>
+        <!-- 小标记 -->
+        <a href="javascript:;"><i class="fa fa-pencil"></i></a>
+    </ng-container>
+
+    <!-- 编辑模式 -->
+    <ng-container *ngIf="componentMode === 'editMode'">
+        <!-- ExcelCell 自身的模板 优先级最高 -->
+        <ng-container *ngIf="templateEdit">
+            <ng-container *ngTemplateOutlet="templateEdit; context: { context: context, column: column, handle: templateHandle }"></ng-container>
+        </ng-container>
+        <!-- 从列定义中继承的模板 -->
+        <ng-container *ngIf="!templateEdit && column.templateEdit">
+            <ng-container *ngTemplateOutlet="column.templateEdit; context: { context: context, column: column, handle: templateHandle }"></ng-container>
+        </ng-container>
+        <!-- 列类型默认模板 -->
+        <div *ngIf="!templateEdit && !column.templateEdit" class="cell-form-control">
+            <!-- 编辑模式: 文本 -->
+            <ng-container *ngIf="['text'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [(ngModel)]="componentValue" [disabled]="disabled"
+                    (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式: 纯数字文本 -->
+            <ng-container *ngIf="['textNumber'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [textMask]="inputMaskTextNumber" [(ngModel)]="componentValue"
+                    [disabled]="disabled" (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式：多行文本2 -->
+            <ng-container *ngIf="['multilineText'].indexOf(column.columnType) >= 0">
+                <textarea class="form-control" [(ngModel)]="componentValue" [disabled]="disabled"
+                    (blur)="handleComponentValueChanged()"></textarea>
+            </ng-container>
+
+            <!-- 编辑模式: 数字 -->
+            <ng-container *ngIf="['number'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [textMask]="inputMaskNumber" [(ngModel)]="componentValue"
+                    [disabled]="disabled" (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式：日期 -->
+            <ng-container *ngIf="['date'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [textMask]="inputMaskDate" [(ngModel)]="componentValue"
+                    [disabled]="disabled" (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式：时间 -->
+            <ng-container *ngIf="['time'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [textMask]="inputMaskTime" [(ngModel)]="componentValue"
+                    [disabled]="disabled" (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式：日期时间 -->
+            <ng-container *ngIf="['datetime'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [textMask]="inputMaskDateTime" [(ngModel)]="componentValue"
+                    [disabled]="disabled" (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式：布尔 -->
+            <ng-container *ngIf="['bool'].indexOf(column.columnType) >= 0">
+                <ng-select class="form-control" appendTo="body" bindLabel="label" bindValue="value" [clearable]="false"
+                    [disabled]="disabled" [(ngModel)]="componentValue"
+                    [items]="[{label:'是',value:true},{label:'否',value:false}]"
+                    (change)="handleComponentValueChanged()"></ng-select>
+            </ng-container>
+
+            <!-- 编辑模式：金额 -->
+            <ng-container *ngIf="['currency'].indexOf(column.columnType) >= 0">
+                <input type="text" class="form-control" [textMask]="inputMaskCurrency" [(ngModel)]="componentValue"
+                    [disabled]="disabled" (blur)="handleComponentValueChanged()">
+            </ng-container>
+
+            <!-- 编辑模式: 外键 -->
+            <ng-container *ngIf="['foreignKey'].indexOf(column.columnType) >= 0">
+                <ng-select *ngIf="selectForeignContextTypeaheadInput$" class="form-control" appendTo="body" [bindLabel]="column.labelKey || 'label'"
+                    [clearable]="false" [disabled]="disabled" [loading]="selectForeignContextLoading"
+                    [(ngModel)]="componentValue"
+                    [items]="selectForeignContexts" [typeahead]="selectForeignContextTypeaheadInput$"
+                    (change)="handleComponentValueChanged()"
+                ></ng-select>
+                <ng-select *ngIf="!selectForeignContextTypeaheadInput$" class="form-control" appendTo="body" [bindLabel]="column.labelKey || 'label'"
+                    [clearable]="false" [disabled]="disabled" [loading]="selectForeignContextLoading"
+                    [(ngModel)]="componentValue"
+                    [items]="selectForeignContexts"
+                    (change)="handleComponentValueChanged()"
+                ></ng-select>
+            </ng-container>
+
+            <!-- 编辑模式: 单选7 -->
+            <ng-container *ngIf="['selectOption'].indexOf(column.columnType) >= 0">
+                <ng-select class="form-control" 
+                    appendTo="body" 
+                    groupBy="group" 
+                    [clearable]="false"
+                    [disabled]="disabled" 
+                    [multiple]="false"
+                    [(ngModel)]="componentValue" 
+                    [items]="column.selectOptions"
+                    (change)="handleComponentValueChanged()">
+                </ng-select>
+            </ng-container>
+    
+            <!-- 只读模式: 多选8, Tags9 -->
+            <ng-container *ngIf="['multiSelectOption','tagsSelectOption'].indexOf(column.columnType) >= 0">
+                <ng-select class="form-control" 
+                    appendTo="body"
+                    groupBy="group"
+                    [multiple]="true"
+                    [clearable]="false"
+                    [disabled]="disabled" 
+                    [closeOnSelect]="false"
+                    [(ngModel)]="componentValue"
+                    [items]="column.selectOptions"
+                    (change)="handleComponentValueChanged()">
+                </ng-select>
+            </ng-container>
+
+        </div>
+    </ng-container>
+</ng-container>
+
+<ng-template #missingTemplate>
+    <div class="cell text-warning"> 未设置 </div>
+</ng-template>

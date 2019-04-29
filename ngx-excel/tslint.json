@@ -3,15 +3,21 @@
   "rules": {
     "directive-selector": [
       true,
+      "ngx-excel",
       "attribute",
       "lib",
       "camelCase"
     ],
     "component-selector": [
       true,
+      "ngx-excel",
       "element",
       "lib",
       "kebab-case"
+    ],
+    "max-line-length": [
+      true,
+      1024
     ]
   }
 }

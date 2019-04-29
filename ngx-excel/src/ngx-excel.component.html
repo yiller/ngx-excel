@@ -1,0 +1,87 @@
+<div class="excel">
+    <div class="excel-head">
+        <div class="excel-row">
+            <ngx-excel-cell handleCell class="locked" [column]="excelHandleColumn"
+                [style.width.px]="excelHandleColumn.computedWidth"
+                [style.left.px]="excelHandleColumn.computedOffset"
+            ></ngx-excel-cell>
+            <ngx-excel-cell headCell *ngFor="let excelColumn of excelColumns" [column]="excelColumn"
+                [class.locked]="excelColumn.locked"
+                [class.invisible]="excelColumn.invisible"
+                [style.width.px]="excelColumn.computedWidth"
+                [style.left.px]="excelColumn.locked ? excelColumn.computedOffset : null"
+            ></ngx-excel-cell>
+        </div>
+        <div *ngIf="componentState === 'initial' || componentState === 'loading' || componentState === 'restoring'" class="loading">
+            <div class="loading-element loading-buffer"></div>
+            <div class="loading-element loading-fill loading-primary"></div>
+            <div class="loading-element loading-fill loading-secondary"></div>
+        </div>
+    </div>
+    <div class="excel-body">
+        <ng-container *ngFor="let excelRow of excelRows">
+            <ngx-excel-context *ngIf="excelRow.visible" class="excel-row" [class.invisible]="!excelRow.visible" [style.transform]="'translateY(' + excelRow.top + 'px)'" [style.height.px]="excelRowHeight" style="position:absolute;" [context]="excelRow.context" [readonly]="readonly" (changeContext)="handleContextChanged($event)">
+                <ngx-excel-cell handleCell class="locked" [column]="excelHandleColumn"
+                    [style.width.px]="excelHandleColumn.computedWidth"
+                    [style.left.px]="excelHandleColumn.computedOffset"
+                ></ngx-excel-cell>
+                <ngx-excel-cell normalCell *ngFor="let excelColumn of excelColumns" [column]="excelColumn"
+                    [disabled]="!readonly && excelColumn.readonly"
+                    [class.locked]="excelColumn.locked"
+                    [class.invisible]="excelColumn.invisible"
+                    [style.width.px]="excelColumn.computedWidth"
+                    [style.left.px]="excelColumn.locked ? excelColumn.computedOffset : null"
+                ></ngx-excel-cell>
+            </ngx-excel-context>
+        </ng-container>
+    </div>
+    <div class="excel-foot">
+        <div class="excel-info">
+            <i *ngIf="componentState === 'initial' || componentState === 'loading' || componentState === 'restoring'" class="fa fa-spin fa-spinner"></i>
+            当前第 <span class="begin"> {{ excelRowLoadedCount ? excelBeginAttachedItem + 1 : 0 }}</span> - <span class="end">{{ excelRowLoadedCount ? excelEndAttachedItem + 1 : 0 }}</span> 记录 / 已加载 <span class="loaded">{{ excelRowLoadedCount }}</span> 共 <span class="total">{{ excelRowTotal }}</span> 记录
+        </div>
+        <div class="scrollbar-x"><span></span></div>
+    </div>
+</div>
+
+<context-menu>
+    <ng-template contextMenuItem *ngFor="let excelPrefixAction of excelPrefixActions"
+        [visible]="excelPrefixAction.visible"
+        [enabled]="excelPrefixAction.enabled"
+        (execute)="handleContextMenuClicked($event, excelPrefixAction)">
+        <i *ngIf="excelPrefixAction.icon" [ngClass]="excelPrefixAction.icon"></i>
+        {{ excelPrefixAction.label }}
+    </ng-template>
+    <ng-template contextMenuItem *ngIf="excelPrefixActions.length" divider="true"></ng-template>
+    <ng-template contextMenuItem *ngFor="let excelColumnAction of excelColumnActions">
+        <i *ngIf="!excelColumnAction.icon" [ngClass]="excelColumnAction.icon"></i>
+        {{ excelColumnAction.label }}
+    </ng-template>
+    <ng-template contextMenuItem *ngIf="excelColumnActions.length" divider="true"></ng-template>
+    <ng-template contextMenuItem *ngFor="let excelContextAction of excelContextActions"
+        [visible]="excelContextAction.visible"
+        [enabled]="excelContextAction.enabled"
+        (execute)="handleContextMenuClicked($event, excelContextAction)">
+        <i *ngIf="excelContextAction.icon" [ngClass]="excelContextAction.icon"></i>
+        {{ excelContextAction.label }}
+    </ng-template>
+    <ng-template contextMenuItem *ngIf="excelContextActions.length" divider="true"></ng-template>
+    <ng-template contextMenuItem *ngIf="excelToggleColumnEnabled" [subMenu]="columnToggledContextMenu">
+        切换列显示
+        <i class="fa fa-caret-right icon-append"></i>
+    </ng-template>
+    <context-menu #columnToggledContextMenu>
+        <ng-template contextMenuItem let-item *ngFor="let excelColumn of excelColumns" [visible]="!excelColumn.locked" (execute)="toggleExcelColumn($event, excelColumn)">
+            <i *ngIf="!excelColumn.invisible" class="fa fa-check-square-o"></i>
+            {{ excelColumn.label }}
+        </ng-template>
+    </context-menu>
+    <ng-template contextMenuItem *ngIf="excelGlobalActions.length" divider="true"></ng-template>
+    <ng-template contextMenuItem *ngFor="let excelGlobalAction of excelGlobalActions"
+        [visible]="excelGlobalAction.visible"
+        [enabled]="excelGlobalAction.enabled"
+        (execute)="handleContextMenuClicked($event, excelGlobalAction)">
+        <i *ngIf="excelGlobalAction.icon" [ngClass]="excelGlobalAction.icon"></i>
+        {{ excelGlobalAction.label }}
+    </ng-template>
+</context-menu>
