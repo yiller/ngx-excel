@@ -1,0 +1,18 @@
+$main-font: "Roboto, 'Helvetica Neue', Helvetica, Tahoma, Arial, 'FZLanTingHeiS-L-G', 'PingFang SC', 'Microsoft YaHei'";
+
+$layout-breakpoints: (
+    // Small screen / phone
+  	sm: 576px,
+  	// Medium screen / tablet
+		md: 768px,
+		// md: 1024px,
+  	// Large screen / desktop
+		lg: 992px,
+		// lg: 1400px,
+  	// Extra large screen / wide desktop
+  	xl: 1200px,
+    // Extra large screen / wide desktop
+    xxl: 1400px,
+    // Super Extra large screen / wide desktop
+    xxxl: 1600px
+)!default;

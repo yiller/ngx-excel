@@ -3,7 +3,16 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+    production: false,
+    name: 'NgxExcel Demo',
+
+    WebApiConfig: {
+        'gatewayUrl': '/api',
+        'requestHeaders': { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        'debug': false
+    },
+
+    AuthConfig: {}
 };
 
 /*

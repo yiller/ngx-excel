@@ -411,17 +411,6 @@ export abstract class NgxExcelService<T> {
      */
     protected getSelectOptions(name: string): NgxExcelSelectOption[] {
         return this.helper.getSelectOptions(name);
-        /*if (this.selectGroups.has(name)) {
-            return this.selectGroups.get(name);
-        }
-
-        const selectGroup = this.builderService.getSelectGroups([name]).find((group) => group.name === name);
-        const selectOptions = (selectGroup ? selectGroup.options : []).map((option) => {
-            option.value = typeof (option.value) === 'number' ? option.value.toString() : option.value;
-            return option;
-        });
-        this.selectGroups.set(name, selectOptions);
-        return selectOptions;*/
     }
 
     /**
